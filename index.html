@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Master Color Studio | Abdu Salim</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --ink: #1a1a1a;
+      --paper: #f4e4bc;
+      --accent: #d9534f;
+      --grain: url('https://www.transparenttextures.com/patterns/stardust.png');
+    }
+
+    /* --- BASE STYLES --- */
+    body {
+      background-color: var(--paper);
+      background-image: var(--grain);
+      color: var(--ink);
+      font-family: 'Courier New', Courier, monospace;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    /* --- ANIMATIONS --- */
+    @keyframes slideIn {
+      from { transform: translateX(-30px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .animate-pop { animation: pop 0.3s ease-out forwards; }
+    .animate-slide { animation: slideIn 0.4s ease-out forwards; }
+
+    /* --- UI COMPONENTS --- */
+    .container-main {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #fff;
+      border: 6px solid var(--ink);
+      padding: 40px;
+      box-shadow: 15px 15px 0px var(--ink);
+      position: relative;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 12px;
+      border: 3px solid var(--ink);
+      background: #fff;
+      font-weight: bold;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    .input-field:focus { border-color: #667eea; background: #fafafa; }
+
+    /* PIE-CUT EYE FOR PASSWORD */
+    .eye-wrapper { position: relative; width: 100%; }
+    .pie-eye {
+      position: absolute; right: 12px; top: 10px;
+      width: 24px; height: 24px; background: var(--ink);
+      border-radius: 50%; cursor: pointer; z-index: 10;
+    }
+    .pie-eye::after {
+      content: ''; position: absolute; top: 3px; right: 3px;
+      width: 10px; height: 10px; background: #fff;
+      clip-path: polygon(100% 0, 0 100%, 100% 100%);
+    }
+
+    .btn-action {
+      background: var(--ink);
+      color: #fff;
+      padding: 12px 24px;
+      font-weight: 900;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: 0.2s;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-action:hover { transform: translate(-3px, -3px); box-shadow: 5px 5px 0px #667eea; }
+
+    /* --- COLOR COLUMN (clm) --- */
+    .color-row {
+      display: flex; align-items: center; gap: 15px;
+      padding: 12px; border: 3px solid var(--ink);
+      background: #fff; margin-bottom: 8px;
+    }
+    .color-box { width: 45px; height: 45px; border: 2px solid var(--ink); flex-shrink: 0; }
+
+    /* --- PRINT LOGIC --- */
+    @media print {
+      body { background: white !important; padding: 0; }
+      .no-print { display: none !important; }
+      .container-main { box-shadow: none !important; border: 2px solid black !important; width: 100% !important; }
+      .print-only { display: block !important; }
+      .color-row { break-inside: avoid; border: 1px solid black !important; }
+    }
+    .print-only { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="container-main">
+    
+    <div class="print-only text-center border-b-2 border-black mb-8 pb-4">
+      <h1 class="text-3xl font-bold">OFFICIAL STUDIO ARCHIVE</h1>
+      <p>Project: Full Action Dashboard 2026</p>
+    </div>
+
+    <header class="text-center border-b-4 border-black pb-6 mb-8 no-print">
+      <h1 class="text-5xl font-black italic tracking-tighter">STUDIO DASHBOARD</h1>
+      <p class="font-bold text-sm opacity-70">DESIGNER: ABDU SALIM // ARCHITECT EDITION</p>
+    </header>
+
+    <div class="no-print flex justify-end mb-6">
+      <button onclick="window.print()" class="btn-action bg-blue-600">
+        <span>🖨️</span> PRINT PAGE OUT
+      </button>
+    </div>
+
+    <section class="mb-10 p-6 border-4 border-double border-black no-print">
+      <h2 class="text-xl font-black mb-4 uppercase">🔐 Studio Access</h2>
+      <form id="signUpForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="text" id="regName" class="input-field" placeholder="Full Name" required>
+        <div class="eye-wrapper">
+          <input type="password" id="regPass" class="input-field" placeholder="Passcode" required>
+          <div class="pie-eye" onclick="togglePass('regPass')"></div>
+        </div>
+        <button type="submit" class="btn-action col-span-full justify-center">Create Studio Account</button>
+      </form>
+      <div id="welcomeMsg" class="hidden mt-4 p-4 bg-green-100 border-2 border-green-800 font-bold animate-pop text-center"></div>
+    </section>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+      
+      <section class="p-6 bg-gray-50 border-4 border-black">
+        <h2 class="text-xl font-black mb-4 border-b-2 border-black">🎨 COLOR COLUMN</h2>
+        <div class="flex gap-2 mb-6 no-print">
+          <input type="color" id="colorInput" class="h-14 w-20 border-3 border-black cursor-pointer">
+          <button onclick="addColor()" class="btn-action flex-grow justify-center">Add One Color</button>
+        </div>
+        <div id="colorStack">
+          <div class="color-row animate-slide">
+            <div class="color-box" style="background: #667eea;"></div>
+            <div class="flex-grow">
+              <div class="font-black">#667EEA</div>
+              <div class="text-[10px]">INITIAL SYSTEM COLOR</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="p-6 bg-gray-50 border-4 border-black">
+        <h2 class="text-xl font-black mb-4 border-b-2 border-black">📩 SYSTEM MESSAGES</h2>
+        <form id="msgForm" class="space-y-3 no-print">
+          <input type="text" id="msgUser" class="input-field" placeholder="Name" required>
+          <input type="email" id="msgEmail" class="input-field" placeholder="Email" required>
+          <textarea id="msgContent" class="input-field h-24" placeholder="Message content..." required></textarea>
+          <button type="submit" class="btn-action w-full justify-center">Send To Inbox</button>
+        </form>
+
+        <div id="messageInbox" class="mt-6 space-y-4">
+          </div>
+      </section>
+
+    </div>
+
+    <footer class="mt-10 pt-6 border-t-4 border-black text-center">
+      <p class="text-[10px] font-black uppercase">© 2026 Abdu Salim // Web Developer & Designer // Full Action System</p>
+    </footer>
+  </div>
+
+  <script>
+    // 1. Password Visibility
+    function togglePass(id) {
+      const p = document.getElementById(id);
+      p.type = p.type === 'password' ? 'text' : 'password';
+    }
+
+    // 2. Sign Up Action
+    document.getElementById('signUpForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('regName').value;
+      const welcome = document.getElementById('welcomeMsg');
+      welcome.innerHTML = `⭐ WELCOME, ${name.toUpperCase()}! ACCOUNT AUTHORIZED.`;
+      welcome.classList.remove('hidden');
+      this.reset();
+    });
+
+    // 3. Add Color One-by-One
+    function addColor() {
+      const color = document.getElementById('colorInput').value;
+      const stack = document.getElementById('colorStack');
+      const row = document.createElement('div');
+      row.className = "color-row animate-slide";
+      row.innerHTML = `
+        <div class="color-box" style="background:${color}"></div>
+        <div class="flex-grow">
+          <div class="font-black">${color.toUpperCase()}</div>
+          <div class="text-[10px]">HEX CODE ARCHIVE</div>
+        </div>
+        <button onclick="this.parentElement.remove()" class="no-print text-red-600 font-bold text-xs">[DELETE]</button>
+      `;
+      stack.prepend(row);
+    }
+
+    // 4. Message Action
+    document.getElementById('msgForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const user = document.getElementById('msgUser').value;
+      const text = document.getElementById('msgContent').value;
+      const inbox = document.getElementById('messageInbox');
+
+      const msgCard = document.createElement('div');
+      msgCard.className = "p-4 bg-white border-2 border-black animate-pop";
+      msgCard.innerHTML = `
+        <div class="flex justify-between items-center mb-1">
+          <strong class="text-xs uppercase">From: ${user}</strong>
+          <span class="text-[9px] bg-black text-white px-1">LOGGED</span>
+        </div>
+        <p class="text-xs italic">"${text}"</p>
+      `;
+      inbox.prepend(msgCard);
+      this.reset();
+    });
+  </script>
+</body>
+</html>
